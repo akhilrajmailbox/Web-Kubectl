@@ -66,6 +66,7 @@ roleRef:
 Create the rbac on your cluster after update the file
 
 ```
+kubectl create ns web-kub
 kubectl apply -f rbac.yaml
 ```
 
