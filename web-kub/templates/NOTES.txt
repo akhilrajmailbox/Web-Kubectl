@@ -1,4 +1,9 @@
-1. Get the application URL by running these commands:
+1. get the Google Authenticator provided key 
+
+export SERVICE_POD=$(kubectl get pods -l "app={{ include "web-kub.name" . }}" --namespace web-kub -o jsonpath='{.items[0].metadata.name}')
+kubectl logs -f --namespace {{ .Release.Namespace }} ${SERVICE_POD}
+
+2. Get the application URL by running these commands:
 
 {{- if contains "LoadBalancer" .Values.service.type }}
   export SERVICE_URL=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "web-kub.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
