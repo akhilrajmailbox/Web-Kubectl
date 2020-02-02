@@ -3,12 +3,12 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: webkubsrvaccount
-  namespace: monitor
+  namespace: web-kub
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: nagios-clusterrole
+  name: webkub-clusterrole
 rules:
 # Just an example, feel free to change it
 - apiGroups: [""]
@@ -18,12 +18,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: nagios-clusterrolebinding
+  name: webkub-clusterrolebinding
 subjects:
 - kind: ServiceAccount
   name: webkubsrvaccount
-  namespace: monitor
+  namespace: web-kub
 roleRef:
   kind: ClusterRole
-  name: nagios-clusterrole
+  name: webkub-clusterrole
   apiGroup: rbac.authorization.k8s.io

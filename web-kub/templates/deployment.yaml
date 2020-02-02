@@ -24,7 +24,7 @@ spec:
           emptyDir: {}
         {{- end }}
       hostname: web-kub
-      serviceAccountName: webkubsrvaccount
+      serviceAccountName: {{ .Values.serviceaccount }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -36,16 +36,16 @@ spec:
             value : "{{ .Values.ssh.password }}"
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 5688
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: 5688
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: 5688
           volumeMounts:
           - mountPath: /home/
             name: homevol

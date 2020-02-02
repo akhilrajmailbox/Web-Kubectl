@@ -3,11 +3,11 @@ entries:
   web-kub:
   - apiVersion: v1
     appVersion: "1.0"
-    created: 2020-02-02T18:26:40.815391381+05:30
+    created: 2020-02-02T19:11:04.647513605+05:30
     description: A Helm chart for Kubernetes
-    digest: 29a2637d1d33298422c942acf32ecec542daf02420d64aca3104e829527efbd6
+    digest: ab1f3ed03cea6708a6d83e26049e6ab67cfb663350ab06497ec9ac3d0cb97658
     name: web-kub
     urls:
     - https://akhilrajmailbox.github.io/Web-Kubectl/docs/web-kub-0.1.0.tgz
     version: 0.1.0
-generated: 2020-02-02T18:26:40.81365848+05:30
+generated: 2020-02-02T19:11:04.646556793+05:30
