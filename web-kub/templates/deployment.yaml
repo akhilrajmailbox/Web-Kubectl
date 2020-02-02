@@ -29,6 +29,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: USERNAME
+            value : "{{ .Values.ssh.username }}"
+          - name: PASSWORD
+            value : "{{ .Values.ssh.password }}"
           ports:
             - name: http
               containerPort: 80
