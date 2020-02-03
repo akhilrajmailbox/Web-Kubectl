@@ -1,5 +1,7 @@
 # Web Kubectl Interface
 
+![webkubectl](https://raw.githubusercontent.com/akhilrajmailbox/Web-Kubectl/master/img/webkube.png)
+
 This is an custom application which can used for communicate with your k8s Cluster without any kubectl configuration on your local system. `web-kubectl` have these features...
 
 * `2FA` Authentication
@@ -18,7 +20,7 @@ Two factor authentication, also known as two-step verification, requires you to 
 After your deployment, check the logs for the deployment and scan the QR Code / take the key with `Google Authenticator` application on your phone, thats it. done...!
 
 
-![2fa](https://raw.githubusercontent.com/akhilrajmailbox/Web-Kubectl/master/img/2fa.png)
+![2fa](https://raw.githubusercontent.com/akhilrajmailbox/Web-Kubectl/master/img/webkubetoken.png)
 
 
 ## Conifgure ServiceAccount for the deployment
