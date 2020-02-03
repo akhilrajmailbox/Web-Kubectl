@@ -1,5 +1,5 @@
 #!/bin/bash
-RANGE=6
+RANGE=5
 LOC=/opt/Cowsay_Script/
 number=$RANDOM
 let "number %= $RANGE"
@@ -20,11 +20,8 @@ case $number in
     4)
         cow="lol5"
     ;;
-    5)
-        cow="lol6"
-    ;;
 esac
 
 cat $LOC/$cow | /usr/local/bin/lolcat
-echo -e "\n\nCreated by - Akhil Raj ❤ ❤ ❤ ❤" | /usr/local/bin/lolcat -a -d 30
+echo -e "\n\nCreated by - Akhil Raj ❤ ❤ ❤ ❤" | /usr/local/bin/lolcat -a -d 10
 echo ""

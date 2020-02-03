@@ -29,7 +29,7 @@ After your deployment, check the logs for the deployment and scan the QR Code / 
 This is an example `ServiceAccount` creation yaml file. before creating the rbac, update the following terms in `rbac.yaml` file.
 
 * `namespace: web-kub` with your namespace
-* `verbs: ["get", "watch", "list"]` > this configuration having readonly permission, if you need more privilege for your `web-kubectl` to your cluster, you can [update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) it, example : `verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]`
+* `verbs: ["get", "watch", "list"]` > this configuration having readonly permission, if you need more privilege for your `web-kubectl` to your cluster and `verbs: ["create"]` for `pods/exec` to run exec commands, you can [update](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) it, example : `verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]`
 
 ```
 ---
@@ -60,6 +60,29 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: webkub-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+## for pod exec commands
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: webkub-pod-clusterrole
+rules:
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: webkub-pod-clusterrolebinding
+subjects:
+- kind: ServiceAccount
+  name: webkubsrvaccount
+  namespace: web-kub
+roleRef:
+  kind: ClusterRole
+  name: webkub-pod-clusterrole
   apiGroup: rbac.authorization.k8s.io
 ```
 

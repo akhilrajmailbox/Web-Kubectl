@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 MAINTAINER Akhil Raj <akhilrajmailbox@gmail.com>
-RUN apt-get update && apt-get install zsh git locales ruby cowsay vim shellinabox openssh-server openssh-client libpam-google-authenticator -y \
+RUN apt-get update && apt-get install zsh git curl locales ruby cowsay vim shellinabox openssh-server openssh-client libpam-google-authenticator -y \
     && gem install lolcat
 
 ARG CONFIG_PATH=/etc/default/shellinabox
@@ -14,6 +14,11 @@ RUN echo "auth required pam_google_authenticator.so" >> /etc/pam.d/sshd \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG=en_US.UTF-8
+
+WORKDIR /tmp/
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+RUN chmod +x kubectl
+RUN mv kubectl /usr/local/bin/
 
 WORKDIR /etc/shellinabox/options-enabled/
 RUN mv 00+Black\ on\ White.css 00_Black\ on\ White.css \
