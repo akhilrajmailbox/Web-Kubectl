@@ -15,6 +15,8 @@ RUN echo "auth required pam_google_authenticator.so" >> /etc/pam.d/sshd \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG=en_US.UTF-8
 
+RUN echo -e "KUBERNETES_SERVICE_PORT=someport\nKUBERNETES_SERVICE_HOST=somehost" >> /etc/environment
+
 WORKDIR /tmp/
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 RUN chmod +x kubectl
@@ -36,6 +38,7 @@ RUN chmod 700 /entrypoint.sh
 ENV LANG en_US.UTF-8
 ENV USERNAME=""
 ENV PASSWORD=""
+ENV AUTO_KUBERNETES_CONFIG "true"
 WORKDIR /home/
 
 ENTRYPOINT "/entrypoint.sh"

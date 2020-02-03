@@ -125,6 +125,7 @@ The following table lists the configurable parameters of the `web-kub` chart and
 | serviceaccount                     | Service Account for the deployment to communicate with k8s             | webkubsrvaccount                                                        |
 | ssh.username                       | username for ssh / web access                    | kubectl                                                   |
 | ssh.password                       | password for the user `ssh.username`             | -                                                         |
+| kubeconfig                         | enable / disbale auto configuration for kubectl  | true                                                      |
 | service.port                       | TCP port                                         | 80                                                        |
 | service.type                       | K8S service type exposing ports, e.g. `ClusterIP`| LoadBalancer                                              |
 | persistence.enabled                | enable / disable persistence volume              | ReadWriteOnce                                             |

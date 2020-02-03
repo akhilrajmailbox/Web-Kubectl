@@ -10,6 +10,9 @@ image:
   pullPolicy: Always
 
 serviceaccount: webkubsrvaccount
+
+kubeconfig: true
+
 ssh:
   username: kubectl
   password: ""
