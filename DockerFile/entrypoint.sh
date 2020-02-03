@@ -3,9 +3,9 @@
 function kubeauth() {
     if [[ ${AUTO_KUBERNETES_CONFIG} == "true" ]] ; then
         if [[ ! -z ${KUBERNETES_SERVICE_PORT} ]] && [[ ! -z ${KUBERNETES_SERVICE_HOST} ]] ; then
-            echo "configuring KUBERNETES CONFIG"
+            echo -e "\nconfiguring KUBERNETES CONFIG with KUBERNETES_SERVICE_PORT=${KUBERNETES_SERVICE_PORT} and KUBERNETES_SERVICE_HOST=${KUBERNETES_SERVICE_HOST}"
             sed -i "s|^KUBERNETES_SERVICE_PORT=.*|KUBERNETES_SERVICE_PORT=${KUBERNETES_SERVICE_PORT}|g" /etc/environment
-            sed -i "s|^nKUBERNETES_SERVICE_HOST=.*|nKUBERNETES_SERVICE_HOST=${nKUBERNETES_SERVICE_HOST}|g" /etc/environment
+            sed -i "s|^KUBERNETES_SERVICE_HOST=.*|KUBERNETES_SERVICE_HOST=${KUBERNETES_SERVICE_HOST}|g" /etc/environment
         else
             echo -e "\n KUBERNETES_SERVICE_PORT or KUBERNETES_SERVICE_HOST missing...!"
             exit 1
