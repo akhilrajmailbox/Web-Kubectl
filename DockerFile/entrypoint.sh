@@ -33,6 +33,7 @@ function config() {
             su ${USERNAME} bash -c 'wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh'
             su ${USERNAME} bash -c 'echo "RPS1='"'%w %@'"'"' >> /home/${USERNAME}/.zshrc
             su ${USERNAME} bash -c 'echo "source /opt/cowsay.sh"' >> /home/${USERNAME}/.zshrc
+            su ${USERNAME} bash -c 'mkdir /home/${USERNAME}/.cache && touch /home/${USERNAME}/.cache/motd.legal-displayed'
         else
             echo -e "\n USERNAME or PASSWORD missing...!"
             exit 1
