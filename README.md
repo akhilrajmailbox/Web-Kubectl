@@ -27,7 +27,7 @@ After your deployment, check the logs for the deployment and scan the QR Code / 
 
 
 ```code
-# values.yaml
+# helm-values.yml
 
 secrets:
   enabled: true
@@ -38,7 +38,8 @@ secrets:
 
 ```bash
 helm repo add ar-webkub https://akhilrajmailbox.github.io/web-kubectl/docs
-helm install ar-webkub/web-kub \
-  -n web-kubectl --namespace=web-kub \
-  -f values.yaml
+kubectl create ns web-kub
+helm upgrade --install web-kubectl ar-webkub/web-kubectl \
+  --namespace web-kub \
+  -f helm-values.yml
 ```
