@@ -1,0 +1,24 @@
+apiVersion: v1
+entries:
+  web-kubectl:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-02-17T12:59:40.079116174Z"
+    description: A Helm chart for deploying web-kubectl
+    digest: 92b414ceb5103f97f61eca1f350f721fc856f1f39d2eed3296721fd1599c2b23
+    name: web-kubectl
+    type: application
+    urls:
+    - web-kubectl-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v2
+    appVersion: 0.0.0-latest
+    created: "2026-02-17T12:59:40.07834683Z"
+    description: A Helm chart for deploying web-kubectl
+    digest: 1f80ddb179e95a6fcd9bdba6e849a6a7db56e12a29a22b5296df76ef64f74bad
+    name: web-kubectl
+    type: application
+    urls:
+    - web-kubectl-0.0.0-latest.tgz
+    version: 0.0.0-latest
+generated: "2026-02-17T12:59:40.07658677Z"
