@@ -3,7 +3,7 @@ name: CICD Build - Charts
 on:
   push:
     branches:
-      - "master"
+      - "main"
     paths:
       - 'helm-chart/**'
 
@@ -53,6 +53,10 @@ jobs:
           export SEMANTIC_VER="${NEXT_VER}"
           export LATEST_VER="0.0.0-latest"
 
+          if [[ ! -d ./docs ]] ; then
+            mkdir ./docs
+          fi
+
           # specific version
           helm package helm-chart --version ${SEMANTIC_VER} --app-version ${SEMANTIC_VER} -d ./docs
           # latest version
@@ -74,7 +78,7 @@ jobs:
           git config user.email "github-actions[bot]"
 
           if git status --porcelain | grep .; then
-            git add docs
+            git add docs do_not_edit.txt
             git commit -m "chore(helm): pushing new helm release"
             git push
           else

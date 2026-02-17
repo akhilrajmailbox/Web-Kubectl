@@ -3,9 +3,9 @@ name: CICD Build - Docker Image
 on:
   push:
     branches:
-      - "master"
+      - "main"
     paths:
-       - 'docker/**'
+      - 'docker/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

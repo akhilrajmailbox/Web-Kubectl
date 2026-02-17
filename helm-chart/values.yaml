@@ -327,3 +327,4 @@ affinity: {}
   #           values:
   #           - "web-kubectl"
   #       topologyKey: "kubernetes.io/hostname"
+  
