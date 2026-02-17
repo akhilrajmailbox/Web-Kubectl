@@ -1,0 +1,8 @@
+{{- if .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "web-kubectl.serviceAccountName" . }}-role
+rules:
+  {{- toYaml .Values.serviceAccount.rules | nindent 2 }}
+{{- end }}

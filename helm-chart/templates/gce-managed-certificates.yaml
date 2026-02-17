@@ -1,0 +1,11 @@
+{{- if .Values.gceIngress.managedCertificate.enabled -}}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: {{ include "web-kubectl.fullname" . }}
+spec:
+  {{- with .Values.gceIngress.managedCertificate.domains }}
+  domains:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

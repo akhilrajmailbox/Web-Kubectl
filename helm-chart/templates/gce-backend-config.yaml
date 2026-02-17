@@ -1,0 +1,25 @@
+{{- if .Values.gceIngress.backendConfigs.enabled }}
+{{- $fullName := include "web-kubectl.fullname" . }}
+
+{{- range .Values.gceIngress.backendConfigs.items }}
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ $fullName }}-{{ .name }}
+spec:
+  {{- if .timeoutSec }}
+  timeoutSec: {{ .timeoutSec }}
+  {{- end }}
+
+  {{- with .healthCheck }}
+  healthCheck:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- if and .securityPolicy .securityPolicy.enabled }}
+  securityPolicy:
+    name: {{ .securityPolicy.name }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}

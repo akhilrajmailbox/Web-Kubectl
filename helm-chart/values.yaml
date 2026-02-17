@@ -1,0 +1,329 @@
+fullnameOverride: "web-kubectl"
+replicaCount: 1
+revisionHistoryLimit: 10
+progressDeadlineSeconds: 600
+terminationGracePeriodSeconds: 180
+enableServiceLinks: false
+
+workloadAnnotations: {}
+
+podRestart:
+  enabled: true
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    # maxUnavailable: 25%
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+image:
+  repository: "akhilrajmailbox/web-kubectl"
+  pullPolicy: Always # IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+entrypoint:
+  enabled: false
+  # command:
+  #   - "/bin/bash"
+  #   - "-c"
+  # args:
+  #   - "/docker-entrypoint.sh"
+
+imagePullSecrets: []
+nameOverride: ""
+
+envAnnotations: {}
+
+additionalEnvFrom:
+  enabled: false
+  items: []
+    # - configMapRef:
+    #     name: sample-env-configmap
+    # - secretRef:
+    #     name: sample-env-secrets
+
+confimaps:
+  enabled: false
+  # configMapData:
+  #   Project: web-kubectl
+
+secrets:
+  enabled: false
+  # secretData:
+  #   Project: web-kubectl
+
+configfiles:
+  enabled: false
+  # configFile:
+  #   example.yaml: |-
+  #     # Non sensitive onfiguration Files and content
+
+secretfiles:
+  enabled: false
+  # secretFile:
+  #   example.yaml: |-
+  #     # Sensitive onfiguration Files and content
+
+podDisruptionBudget:
+  enabled: true
+  # minAvailable: 1
+  maxUnavailable: 1
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  rules:
+    - apiGroups: [""]
+      resources: ["*"]
+      verbs: ["get", "watch", "list"]
+
+resources:
+  requests:
+    memory: 500Mi
+    cpu: 200m
+  limits:
+    memory: 1024Mi
+    cpu: 500m
+
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command:
+  #       - /bin/bash
+  #       - -c
+  #       - sleep 60
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 5688
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 2
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 5688
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 2
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  annotations: {}
+  type: ClusterIP
+  protocol: TCP
+  port: 5688
+
+# gce ingress
+gceIngress:
+  frontendConfig:
+    enabled: false
+  managedCertificate:
+    enabled: false
+    # domains:
+    #   - example.com
+    #   - www.example.com
+  backendConfigs:
+    enabled: false
+    items: []
+      # - name: default
+      #   timeoutSec: 120
+      #   healthCheck:
+      #     checkIntervalSec: 15
+      #     timeoutSec: 5
+      #     healthyThreshold: 2
+      #     unhealthyThreshold: 2
+      #     type: HTTP
+      #     requestPath: "/health"
+      #     # port: 5688
+      #   securityPolicy:
+      #     enabled: false
+      #     name: "example-security-policy"
+
+persistentVolume:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  labels: {}
+  annotations: {}
+  existingClaim: ""
+  mountPath: /home/
+  size: 64Gi
+  # storageClassName: "-"
+  # volumeBindingMode: ""
+  ## Subdirectory of data Persistent Volume to mount
+  ## Useful if the volume's root directory is not empty
+  ##
+  subPath: ""
+  ## Persistent Volume Claim Selector
+  ## Useful if Persistent Volumes have been provisioned in advance
+  ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+  ##
+  # selector:
+  #  matchLabels:
+  #    release: "stable"
+  #  matchExpressions:
+  #    - { key: environment, operator: In, values: [ dev ] }
+  ## Persistent Volume Name
+  ## Useful if Persistent Volumes have been provisioned in advance and you want to use a specific one
+  ##
+  # volumeName: ""
+
+emptyDir:
+  ## Server emptyDir volume size limit
+  ##
+  sizeLimit: ""
+
+ingresses:
+  enabled: false
+  # items:
+  #   - name: test1
+  #     className: "alb"
+  #     servicePort: 8080
+  #     annotations: {}
+  #     hosts: []
+
+# # nginx ingress >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> nginx ingress
+# ingresses:
+#   enabled: true
+#   items:
+#     - name: web
+#       className: "nginx"
+#       servicePort: 5688
+#       annotations:
+#         nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+#         nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+#         nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+#         nginx.ingress.kubernetes.io/ssl-redirect: "true"
+#         cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#         # acme.cert-manager.io/http01-edit-in-place: "true"
+#         # nginx.ingress.kubernetes.io/use-regex: "true"
+#         # nginx.ingress.kubernetes.io/rewrite-target: $2
+#       tls:
+#       - hosts:
+#         - www.example.com
+#         secretName: example-tls
+#       hosts:
+#         - host: www.example.com
+#           paths:
+#             - path: /
+#               pathType: Prefix
+
+# # gce ingress >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> gce ingress
+# ingresses:
+#   enabled: true
+#   items:
+#     - name: web
+#       servicePort: 5688
+#       annotations:
+#         networking.gke.io/managed-certificates: web-kubectl
+#         kubernetes.io/ingress.global-static-ip-name: static-ip-name
+#         kubernetes.io/ingress.allow-http: "true"
+#         kubernetes.io/ingress.class: "gce"
+#       hosts:
+#         - host: www.example.com
+#           paths:
+#             # Production or /v1
+#             - path: /v1/
+#               pathType: Prefix
+#             # Experimental
+#             - path: /experimental/
+#               pathType: Prefix
+
+# # alb ingress >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> alb ingress
+# ingresses:
+#   enabled: true
+#   items:
+#     - name: web
+#       servicePort: 5688
+#       className: "alb"
+#       annotations:
+#         alb.ingress.kubernetes.io/scheme: internet-facing
+#         alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
+#         alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+#         alb.ingress.kubernetes.io/target-type: instance
+#         alb.ingress.kubernetes.io/ssl-redirect: '443'
+#         alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+#         alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+#         alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+#         alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+#         alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+#         alb.ingress.kubernetes.io/success-codes: '200'
+
+#         alb.ingress.kubernetes.io/load-balancer-name: test-web-kubectl-alb
+#         alb.ingress.kubernetes.io/group.name: test-web-kubectl-group
+#         alb.ingress.kubernetes.io/subnets: subnet-something, subnet-something, subnet-something
+#         alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:663591008975:certificate/something
+#       hosts:
+#         - host: www.example.com
+#           paths:
+#             # Production or /v1
+#             - path: /v1/
+#               pathType: Prefix
+#             # Experimental
+#             - path: /experimental/
+#               pathType: Prefix
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true 
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+  # podAntiAffinity:
+  #   preferredDuringSchedulingIgnoredDuringExecution:
+  #   - weight: 100
+  #     podAffinityTerm:
+  #       labelSelector:
+  #         matchExpressions:
+  #         - key: "app.kubernetes.io/name"
+  #           operator: In
+  #           values:
+  #           - "web-kubectl"
+  #       topologyKey: "kubernetes.io/hostname"

@@ -1,0 +1,82 @@
+name: CICD Build - Charts
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - 'helm-chart/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  helm:
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Chart Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setting up Repo Env
+        id: repo_env_setup
+        shell: bash
+        run: |-
+          echo "repository=$(basename ${{ github.repository }})" >> ${GITHUB_OUTPUT}
+
+      - name: Set Lowercase Repo Name
+        id: lc_repository
+        env:
+          REPO_NAME: ${{ steps.repo_env_setup.outputs.repository }}
+        shell: bash
+        run: echo "name=${REPO_NAME,,}" >> ${GITHUB_OUTPUT}
+
+      - name: Helm Installation
+        uses: azure/setup-helm@v4
+
+      - name: Helm Package
+        shell: bash
+        run: |-
+          if test -f "do_not_edit.txt" ; then
+            NEXT_VER=$(cat do_not_edit.txt | awk -F. '{OFS="."; $NF+=1; print $0}')
+            echo ${NEXT_VER} > do_not_edit.txt
+          else
+            NEXT_VER="1.0.0"
+            echo "${NEXT_VER}" > do_not_edit.txt
+          fi
+          
+          export SEMANTIC_VER="${NEXT_VER}"
+          export LATEST_VER="0.0.0-latest"
+
+          # specific version
+          helm package helm-chart --version ${SEMANTIC_VER} --app-version ${SEMANTIC_VER} -d ./docs
+          # latest version
+          helm package helm-chart --version ${LATEST_VER} --app-version ${LATEST_VER} -d ./docs
+
+      - name: Update Helm Index
+        env:
+          CHART_RETENTION: "5"
+        shell: bash
+        run: |-
+          cd docs
+          ls -trl ${{ steps.lc_repository.outputs.name }}*.tgz | grep -v latest | grep -Eo "${{ steps.lc_repository.outputs.name }}-[0-9]+\.[0-9]+\.[0-9]+.tgz" | sort -rV | tail +${{ env.CHART_RETENTION }} | xargs -I {} rm -- {}
+          helm repo index .
+
+      - name: Push 
+        shell: bash
+        run: |-
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]"
+
+          if git status --porcelain | grep .; then
+            git add docs
+            git commit -m "chore(helm): pushing new helm release"
+            git push
+          else
+            echo "No changes to commit"
+          fi

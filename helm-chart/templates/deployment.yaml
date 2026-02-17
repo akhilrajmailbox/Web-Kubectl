@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web-kubectl.fullname" . }}
+  labels:
+    {{- include "web-kubectl.labels" . | nindent 4 }}
+  annotations:
+    {{ include "web-kubectl.checksums" . | nindent 4 }}
+    {{- with .Values.workloadAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "web-kubectl.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.podRestart.enabled }}
+        deploymentTime: {{ now | date "2006-01-02T15:04:05" }}
+        {{- end }}
+        {{ include "web-kubectl.checksums" . | nindent 8 }}
+        {{- with .Values.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "web-kubectl.labels" . | nindent 8 }}
+	      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "web-kubectl.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: {{ .Values.enableServiceLinks }}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          {{- if or .Values.confimaps.enabled .Values.secrets.enabled .Values.additionalEnvFrom.enabled }}
+          envFrom:
+            {{- if .Values.confimaps.enabled }}
+            - configMapRef:
+                name: {{ template "web-kubectl.fullname" . }}
+            {{- end }}
+            {{- if .Values.secrets.enabled }}
+            - secretRef:
+                name: {{ template "web-kubectl.fullname" . }}
+            {{- end }}
+            {{- if .Values.additionalEnvFrom.enabled }}
+              {{- with .Values.additionalEnvFrom.items }}
+                {{ toYaml . | nindent 12 }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.entrypoint.enabled }}
+          {{- with .Values.entrypoint.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.entrypoint.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: home-volume
+              mountPath: {{ .Values.persistentVolume.mountPath }}
+              subPath: {{ .Values.persistentVolume.subPath }}
+            {{ if .Values.volumeMounts }}
+              {{- toYaml .Values.volumeMounts | nindent 12 }}
+            {{- end }}
+      volumes:
+        {{- if .Values.persistentVolume.enabled }}
+        - name: home-volume
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ template "web-kubectl.fullname" . }}{{- end }}
+        {{- else }}
+        - name: home-volume
+          emptyDir:
+          {{- if .Values.emptyDir.sizeLimit }}
+            sizeLimit: {{ .Values.emptyDir.sizeLimit }}
+          {{- else }}
+            {}
+          {{- end -}}
+        {{- end -}}
+        {{ if .Values.volumes }}
+          {{- toYaml .Values.volumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+      {{- if .Values.affinity }}
+        {{- with .Values.affinity }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- else }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: "app.kubernetes.io/name"
+                  operator: In
+                  values:
+                  - "{{ .Release.Name }}"
+              topologyKey: "kubernetes.io/hostname"
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

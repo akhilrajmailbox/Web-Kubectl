@@ -1,0 +1,72 @@
+{{- if .Values.ingresses.enabled }}
+{{- $fullName := include "web-kubectl.fullname" . -}}
+{{- range .Values.ingresses.items }}
+{{- $ing := . }}
+{{- $svcPort := "" -}}
+{{- if $ing.servicePort }}
+  {{- $svcPort = $ing.servicePort -}}
+{{- else if and $.Values.service.ports (gt (len $.Values.service.ports) 0) }}
+  {{- $svcPort = (index $.Values.service.ports 0).port -}}
+{{- else }}
+  {{- $svcPort = $.Values.service.port -}}
+{{- end }}
+{{- if and $ing.className (not (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey $ing.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set $ing.annotations "kubernetes.io/ingress.class" $ing.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-{{ $ing.name }}
+  labels:
+    {{- include "web-kubectl.labels" $ | nindent 4 }}
+  {{- with $ing.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and $ing.className (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ $ing.className }}
+  {{- end }}
+  {{- if $ing.tls }}
+  tls:
+    {{- range $ing.tls }}
+    - secretName: {{ .secretName }}
+      hosts:
+        {{- range .hosts }}
+        - {{ . }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range $ing.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+              {{- end }}
+          {{- end }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}

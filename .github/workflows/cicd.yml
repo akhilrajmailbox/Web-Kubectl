@@ -1,0 +1,74 @@
+name: CICD Build - Docker Image
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+       - 'docker/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setting up Repo Env
+        id: repo_env_setup
+        shell: bash
+        run: |-
+          echo "repository=$(basename ${{ github.repository }})" >> ${GITHUB_OUTPUT}
+
+      - name: Set Lowercase Repo Name
+        id: lc_repository
+        env:
+          REPO_NAME: ${{ steps.repo_env_setup.outputs.repository }}
+        shell: bash
+        run: echo "name=${REPO_NAME,,}" >> ${GITHUB_OUTPUT}
+
+      - name: Log into Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: "${{ github.repository_owner }}/${{ steps.lc_repository.outputs.name }}"
+          tags: |
+            type=semver, pattern={{version}}
+            type=semver, pattern={{major}}.{{minor}}
+            type=sha, prefix=commit-
+            type=ref, event=branch
+            type=ref, event=tag
+            type=raw, value=latest
+          flavor: |
+            latest=${{ github.event_name == 'release' }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          pull: true
+          push: false
+          context: docker
+          file: docker/Dockerfile
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}

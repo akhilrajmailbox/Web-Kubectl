@@ -1,0 +1,20 @@
+#!/bin/bash
+
+function run() {
+    if [[ ! -z ${SSH_USERNAME} ]] ; then
+        GAUTH_USER=${SSH_USERNAME}
+    else
+        GAUTH_USER=$(whoami)
+    fi
+
+    if [[ -f /home/${GAUTH_USER}/.google_authenticator ]] ; then
+        SECRET=$(head -n1 /home/${GAUTH_USER}/.google_authenticator)
+        OTP_URI="otpauth://totp/SSH:${GAUTH_USER}@$(hostname)?secret=${SECRET}&issuer=SSH"
+        echo -e "\n\nMFA QR Code for the user : ${GAUTH_USER}" | /usr/local/bin/lolcat -a -d 10
+        qrencode -t ANSIUTF8 ${OTP_URI}
+    else
+        echo "google_authenticator not setup for user ${GAUTH_USER}"
+    fi 
+}
+
+run

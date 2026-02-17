@@ -1,0 +1,14 @@
+{{- if .Values.configfiles.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "web-kubectl.fullname" . }}-file
+  labels:
+    {{- include "web-kubectl.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.envAnnotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  {{- toYaml .Values.configfiles.configFile | nindent 2 }}
+{{- end }}
